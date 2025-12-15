@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>S.W.A.T. Aufnahmeprüfung</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body {
+    font-family: 'Roboto', sans-serif;
+    background: #0d0d0d url('5007ea91-e815-4bef-bc46-3cd8e6bd4106.png') no-repeat center center;
+    background-size: cover;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    background-attachment: fixed;
+}
+.container {
+    background: rgba(0,0,0,0.9);
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+}
+h1,h2 { text-align: center; font-weight: 700; letter-spacing: 1px; }
+.question {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+.timer { text-align:center; font-size: 22px; color: #ff5252; font-weight:bold; margin-bottom: 20px; }
+button {
+    width:100%; padding:15px; font-size:18px; background-color:#c62828;
+    color:#fff; border:none; border-radius:8px; cursor:pointer; transition:0.3s;
+}
+button:hover { background-color:#e53935; }
+input[type="text"] { width:100%; padding:10px; border-radius:5px; border:none; margin-bottom:15px; }
+table { width:100%; border-collapse: collapse; margin-top:30px; }
+th,td { border:1px solid #fff; padding:8px; text-align:center; color:#fff; }
+th { background: rgba(255,255,255,0.2); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.05); }
+#progress-container { width:100%; background:#333; border-radius:5px; margin-bottom:20px; }
+#progress-bar { width:100%; height:15px; background:#ff5252; border-radius:5px; transition: width 1s linear; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>S.W.A.T. Aufnahmeprüfung</h1>
+
+<div id="progress-container"><div id="progress-bar"></div></div>
+<div class="timer" id="timer">40:00</div>
+
+<form id="quiz">
+<p><b>Name:</b></p>
+<input type="text" id="name" required>
+<div id="questions"></div>
+<button type="button" onclick="submitExam()">Prüfung abgeben</button>
+</form>
+
+<h2>📋 Veröffentliche Prüfungsergebnisse</h2>
+<table>
+<tr><th>Name</th><th>Ergebnis</th><th>Status</th><th>Datum</th></tr>
+<tbody id="results"></tbody>
+</table>
+</div>
+
+<script>
+// Fragen
+let questions=[
+["Ab welchem Rang ist der Beitritt ins S.W.A.T. erlaubt?",["Officer","Sergeant","Corporal","Lieutenant"],2],
+["Welche Strafe droht bei Verstößen gegen die Dienstvorschrift?",["Nur Verwarnung","Disziplinarstrafe bis Kündigung","Keine","Versetzung"],1],
+["Welche Einheit führt Hochrisiko-Einsätze durch?",["Verkehrseinheit","S.W.A.T.","Streife","Leitstelle"],1],
+["Was bedeutet Funkcode 10-4?",["Verstanden","Negativ","Standort","Pause"],0],
+["Was bedeutet Funkcode 10-80?",["Verfolgungsjagd","Unfall","Kontrolle","Verstärkung"],0],
+["Wer ist Einsatzleiter vor Ort?",["Streifenführer","Leitstelle","Höchstrangiges Mitglied","Teamleader"],2],
+["Was hat bei einer Geiselnahme oberste Priorität?",["Schneller Zugriff","Sicherheit der Geiseln","Beweissicherung","Führung"],1],
+["Wann erfolgt die Nachbesprechung?",["Vor Einsatz","Während Einsatz","Nach Einsatz","Nie"],2],
+["Was ist taktisches Eindringen?",["Zufällig","Geplant","Allein","Unkoordiniert"],1],
+["Was bedeutet Code 88?",["SWAT Verstärkung","FBI Verstärkung","PD Verstärkung","Keine"],0],
+["Welche Aufgabe hat der Einsatzleiter?",["Koordination","Alleine handeln","Funk ignorieren","Pause machen"],0],
+["Was ist Risikomanagement?",["Gefahren minimieren","Ignorieren","Schnell handeln","Nichts tun"],0],
+["Welche Waffen darf ein Corporal führen?",["AR-15, Einsatzschild, P99, AUG A3, HK416","AWM","Scar-L","Nur P99"],0],
+["Was bedeutet Funkcode 10-12?",["Abmeldung vom Dienst","Pause","Verstärkung","Anmeldung"],0],
+["Wer entscheidet über einen Einsatzabbruch?",["Team","Leitstelle","Einsatzleiter","Alle"],2],
+["Was bedeutet Code 2?",["Blaulicht + Sirene","Ohne Sirene","Einsatz beendet","Pause"],0],
+["Was bedeutet Code 4?",["Einsatz beendet","Fahrt mit Blaulicht","Pause","Unterstützung"],0],
+["Warum sind Trainings wichtig?",["Einsatzsicherheit","Zeitvertreib","Pflicht","Unnötig"],0],
+["Was ist bei Befehlen zu tun?",["Befolgen","Diskutieren","Ignorieren","Verzögern"],0],
+["Wie viele Versuche sind erlaubt?",["Ein Versuch","Zwei Versuche","Unbegrenzt","Keine"],0],
+["Was macht man bei Ablauf der Zeit?",["Automatisch abgeben","Verlängern","Abbrechen","Ignorieren"],0],
+["Welche Funktion hat ein Raid?",["Zielobjekt durchsuchen","Pause machen","Funk kontrollieren","Team motivieren"],0],
+["Was bedeutet 10-13?",["Verhaftung","Unfall","Verfolgung","Pause"],0],
+["Wer koordiniert alle Einheiten?",["Team","Einsatzleiter","PD","Leitstelle"],1],
+["Was ist die Hauptaufgabe der Nachbereitung?",["Analyse & Erfahrung","Pause","Training","Funk"],0],
+["Was bedeutet Code 99?",["Officer in Gefahr","Einsatz beendet","Pause","Unterstützung"],0]
+];
+
+// Ergebnisse laden
+let results = JSON.parse(localStorage.getItem("swat_results")||"[]");
+
+// Paule Wagner hinzufügen, falls nicht vorhanden
+if(!results.some(r => r.name === "Paule Wagner")) {
+    results.push({name:"Paule Wagner", percent:100, status:"BESTANDEN", date:new Date().toLocaleString()});
+    localStorage.setItem("swat_results", JSON.stringify(results));
+}
+
+// Tabelle rendern
+function renderResults(){
+    document.getElementById("results").innerHTML = results.map(r =>
+        `<tr><td>${r.name}</td><td>${r.percent}%</td><td>${r.status}</td><td>${r.date}</td></tr>`).join("");
+}
+renderResults();
+
+// Prüfen, ob 48 Stunden Sperre aktiv
+const lastSubmit = localStorage.getItem("swat_last_submit");
+const now = Date.now();
+const form = document.getElementById("quiz");
+
+if(lastSubmit && (now - parseInt(lastSubmit) < 48*60*60*1000)){
+    form.innerHTML = `<p style="text-align:center; color:#ff5252; font-weight:bold;">
+        Du hast die Prüfung bereits abgegeben. Bitte warte 48 Stunden, bevor du sie erneut machen kannst.
+    </p>`;
+} else {
+    // Fragen rendern
+    document.getElementById("questions").innerHTML = questions.map((q,i) => `
+        <div class="question">
+            <p>${i+1}. ${q[0]}</p>
+            ${q[1].map((a,j) => `<input type="radio" name="q${i}" value="${j==q[2]?1:0}"> ${a}<br>`).join("")}
+        </div>`).join("");
+}
+
+// Timer nur, wenn Formular aktiv
+if(!lastSubmit || (now - parseInt(lastSubmit) >= 48*60*60*1000)){
+    let totalTime = 2400;
+    let time = totalTime;
+    let timer = setInterval(()=>{
+        let m = Math.floor(time/60), s = time%60;
+        document.getElementById("timer").innerText = m + ":" + (s<10?"0"+s:s);
+        document.getElementById("progress-bar").style.width = (time/totalTime*100) + "%";
+        time--;
+        if(time < 0){ clearInterval(timer); submitExam(); }
+    },1000);
+}
+
+// Prüfung absenden
+function submitExam(){
+    let score=0;
+    for(let i=0;i<questions.length;i++){
+        let q=document.querySelector(`input[name="q${i}"]:checked`);
+        if(q) score+=parseInt(q.value);
+    }
+    let percent=Math.round((score/questions.length)*100);
+    let name=document.getElementById("name").value || "Unbekannt";
+    let status=percent>=80 ? "BESTANDEN":"NICHT BESTANDEN";
+    let date=new Date().toLocaleString();
+    results.push({name, percent, status, date});
+    localStorage.setItem("swat_results", JSON.stringify(results));
+    localStorage.setItem("swat_last_submit", Date.now().toString());
+    location.reload();
+}
+</script>
+</body>
+</html>
